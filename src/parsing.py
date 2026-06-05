@@ -1,4 +1,4 @@
-from mapdata import Zone, Connection, ParsingError
+from mapdata import Zone, Connection, Metadata, ParsingError
 
 
 class MapParser():
@@ -38,8 +38,9 @@ class MapParser():
                                                    "integer.")
                         else:
                             metadata_dict[key] = value
+                meta_obj = Metadata(**metadata_dict)
                 name, x, y = parts[1], int(parts[2]), int(parts[3])
-                zone = Zone(name=name, x=x, y=y, **metadata_dict)
+                zone = Zone(name=name, x=x, y=y, metadata=meta_obj)
                 self.zones[name] = zone
                 print(zone)
             file.seek(0)
@@ -72,12 +73,13 @@ class MapParser():
                             except ValueError:
                                 raise ParsingError(f"{key} value has to be an"
                                                    "integer.")
+                meta_obj = Metadata(**metadata_dict)
                 first, second = parts[0].strip(), parts[1].strip()
                 if first not in self.zones or second not in self.zones:
                     raise ParsingError("Connection between unknown zone:"
                                        f"{first} or {second}")
                 connections = Connection(source=first, destination=second,
-                                         **metadata_dict)
+                                         metadata=meta_obj)
                 self.connections.append(connections)
                 print(connections)
 

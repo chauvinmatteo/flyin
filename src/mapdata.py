@@ -23,6 +23,7 @@ class Zone():
     name: str
     x: int
     y: int
+    role: str
     metadata: ZoneMetadata
 
     def __post_init__(self) -> None:

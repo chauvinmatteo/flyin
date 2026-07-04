@@ -37,6 +37,7 @@ class MapParser():
                     else:
                         data = line
                     parts: list[str] = data.split()
+                    role = parts[0].split(':')[0]
                     metadata_dict: dict = {}
                     if metadata:
                         for part in metadata.split():
@@ -53,7 +54,8 @@ class MapParser():
                     self.validate_meta(metadata_dict, allowed_meta, "Zone")
                     meta_obj = ZoneMetadata(**metadata_dict)
                     name, x, y = parts[1], int(parts[2]), int(parts[3])
-                    zone = Zone(name=name, x=x, y=y, metadata=meta_obj)
+                    zone = Zone(name=name, x=x, y=y, role=role,
+                                metadata=meta_obj)
                     # print(zone)
                     self.zones[name] = zone
                 elif line.startswith('connection'):

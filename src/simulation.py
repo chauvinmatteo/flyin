@@ -1,4 +1,5 @@
 from mapdata import Zone, Connection
+from collections import deque
 
 
 class Simulation():
@@ -18,12 +19,22 @@ class Simulation():
                      if z.role == "end_hub"][0]
         self.drones_path: dict[int, list[str]] = {}
 
-    def compute_dijkstra_costs(self):
-        pass
+    def compute_dijkstra_costs(self, goal: str):
+        distances = {name: float('inf') for name in self.graph}
+        distances[goal] = 0
+
+        queue = deque([goal])
+
+        while queue:
+            current = queue.popleft()
+            for neighbor in self.graph[current]:
+                if distances[neighbor] == float('inf'):
+                    distances[neighbor] = distances[current] + 1
+                    queue.append(neighbor)
+        return distances
 
     def print_graph(self) -> None:
-        print("--- Graphe d'adjacence ---")
         for zone, voisins in self.graph.items():
-            print(f"{zone} est relié à : {', '.join(voisins)}")
-        print(self.goal)
-        print("--------------------------")
+            print(f"{zone} is link to : {', '.join(voisins)}")
+        print(f"the goal is : {self.goal}")
+        print(self.compute_dijkstra_costs(self.goal))

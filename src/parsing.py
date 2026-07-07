@@ -1,5 +1,5 @@
 from mapdata import (Zone, Connection, ParsingError, ConnMetadata,
-                     ZoneMetadata, Map)
+                     ZoneMetadata)
 from simulation import Simulation
 
 
@@ -9,6 +9,7 @@ class MapParser():
         self.connections: list[Connection] = []
         self.raw_conn = []
         self.seen_conn = set()
+        self.drones_nb: int = 0
 
     def parse(self, map: str) -> None:
 
@@ -24,7 +25,7 @@ class MapParser():
                 if line.startswith('nb_drones'):
                     key, value = line.split(':')
                     try:
-                        drone_nb = int(value)
+                        self.drones_nb = int(value)
                     except ValueError:
                         raise ParsingError(f"{value} is not an integer.")
                 if line.startswith(('start_hub', 'end_hub', 'hub')):
@@ -61,9 +62,6 @@ class MapParser():
                 elif line.startswith('connection'):
                     self.raw_conn.append(line)
         self._process_conn()
-        map_data = Map(nb_drones=drone_nb, zones=self.zones,
-                       connections=self.connections)
-        print(map_data)
 
     def _process_conn(self) -> None:
 
@@ -121,7 +119,7 @@ def main() -> None:
             simulation = Simulation(
                 zone=parser.zones,
                 connection=parser.connections,
-                drone_nb=4
+                drone_nb=parser.drones_nb
             )
             simulation.print_graph()
     except ParsingError as e:

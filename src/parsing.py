@@ -52,6 +52,8 @@ class MapParser():
                             else:
                                 metadata_dict[key] = value
                     allowed_meta = {'zone_type', 'color', 'max_drones'}
+                    if 'zone' in metadata_dict:
+                        metadata_dict['zone_type'] = metadata_dict.pop('zone')
                     self.validate_meta(metadata_dict, allowed_meta, "Zone")
                     meta_obj = ZoneMetadata(**metadata_dict)
                     name, x, y = parts[1], int(parts[2]), int(parts[3])
@@ -121,7 +123,12 @@ def main() -> None:
                 connection=parser.connections,
                 drone_nb=parser.drones_nb
             )
-            simulation.print_graph()
+            # simulation.print_graph()
+            turn = 0
+            while not simulation.all_drones_arrived():
+                simulation.step()
+                turn += 1
+                print(f"Turn {turn}: {simulation.drone_state}")
     except ParsingError as e:
         print(f"ParsingError: {e}")
 

@@ -1,5 +1,5 @@
 PYTHON = python3
-MAIN = fly_in.PY
+MAIN = src/fly_in.py
 MYPY_FLAGS = --warn-return-any --warn-unused-ignores --ignore-missing-imports \
 --disallow-untyped-defs --check-untyped-defs
 VENV = .venv

@@ -20,9 +20,9 @@ class Simulation():
                                                      name in self.graph}
         for drone_id in self.drone_state:
             self.drones_in_zone["start"].append(drone_id)
-        self.dist_map: dict[str, float] = self.compute_dijkstra_costs(self.goal)
+        self.dist_map: dict = self.compute_dijkstra_costs(self.goal)
         self.drones_path: dict[int, list[str]] = {}
-        self.turn: int = 0
+        self.turn: int = 1
         self.is_finished: bool = False
 
     def get_connection(self, source: str, target: str) -> Connection:
@@ -90,7 +90,6 @@ class Simulation():
         self.drone_state[drone_id] = target_zone
 
     def step(self) -> None:
-        self.turn += 1
         future_occupancy = {name: len(self.drones_in_zone[name])
                             for name in self.graph}
         link_usage = {}
@@ -118,10 +117,10 @@ class Simulation():
                 future_occupancy[current_zone] -= 1
                 future_occupancy[target] += 1
                 link_usage[link_key] = link_count + 1
-            if self.all_drones_arrived():
-                self.is_finished = True
-            else:
-                pass
+        if self.all_drones_arrived():
+            self.is_finished = True
+        else:
+            self.turn += 1
 
     def all_drones_arrived(self) -> bool:
         return all(pos == self.goal for pos in self.drone_state.values())

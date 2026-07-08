@@ -5,7 +5,7 @@ from parsing import MapParser
 
 def main() -> None:
     maps = [
-            "./maps/easy/03_basic_capacity.txt"
+            "./maps/challenger/01_the_impossible_dream.txt"
             ]
     parser = MapParser()
     try:
@@ -17,11 +17,10 @@ def main() -> None:
                 drone_nb=parser.drones_nb
             )
             # simulation.print_graph()
-            turn = 0
             while not simulation.all_drones_arrived():
                 simulation.step()
-                turn += 1
-                print(f"Turn {turn}: {simulation.drone_state}")
+                print(simulation.turn)
+            print(simulation.turn)
     except ParsingError as e:
         print(f"ParsingError: {e}")
 

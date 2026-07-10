@@ -1,4 +1,5 @@
 from mapdata import Zone, Connection
+from parsing import ParsingError
 from collections import deque
 
 
@@ -21,8 +22,11 @@ class Simulation():
         for drone_id in self.drone_state:
             self.drones_in_zone["start"].append(drone_id)
         self.dist_map: dict = self.compute_dijkstra_costs(self.goal)
+        if self.dist_map.get("start", float('inf')) == float('inf'):
+            raise ParsingError("No route from start to end.")
         self.drones_path: dict[int, list[str]] = {}
-        self.turn: int = 1
+        self.drones_cd: dict[int, int] = {i: 0 for i in range(1, drone_nb + 1)}
+        self.turn: int = 0
         self.is_finished: bool = False
 
     def get_connection(self, source: str, target: str) -> Connection:
@@ -99,9 +103,15 @@ class Simulation():
             current_zone = self.drone_state[drone_id]
             if current_zone == self.goal:
                 continue
+
+            if self.drones_cd.get(drone_id, 0) > 0:
+                self.drones_cd[drone_id] -= 1
+                continue
+
             target = self.get_best_move(current_zone, future_occupancy)
             if target == current_zone:
                 continue
+
             conn = self.get_connection(current_zone, target)
             max_link = conn.metadata.max_link_capacity
             link_key = (current_zone, target)
@@ -117,20 +127,13 @@ class Simulation():
                 future_occupancy[current_zone] -= 1
                 future_occupancy[target] += 1
                 link_usage[link_key] = link_count + 1
+                if zone_data.metadata.zone_type == "restricted":
+                    self.drones_cd[drone_id] = 1
         if self.all_drones_arrived():
             self.is_finished = True
+            self.turn += 1
         else:
             self.turn += 1
 
     def all_drones_arrived(self) -> bool:
         return all(pos == self.goal for pos in self.drone_state.values())
-
-    # def print_graph(self) -> None:
-    #     for zone, voisins in self.graph.items():
-    #         print(f"{zone} is link to : {', '.join(voisins)}")
-    #     for zone in self.graph:
-    #         best = self.get_best_move(zone)
-    #         print(f"Depuis {zone}, le drone choisit d'aller vers : {best}")
-    #     print(f"the goal is : {self.goal}")
-    #     print(self.compute_dijkstra_costs(self.goal))
-    #     print(self.drone_state)

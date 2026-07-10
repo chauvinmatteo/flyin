@@ -99,7 +99,6 @@ class MapParser():
             conn = Connection(source=first, destination=second,
                               metadata=meta_obj)
             self.connections.append(conn)
-            # print(conn)
 
     def validate_meta(self, raw_dict, allowed_keys, context):
 

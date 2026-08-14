@@ -1,6 +1,6 @@
 from mapdata import Zone, Connection
 from parsing import ParsingError
-from collections import deque
+import heapq
 
 
 class Simulation():
@@ -48,42 +48,48 @@ class Simulation():
             return 0.1
 
     def compute_dijkstra_costs(self, goal: str) -> dict[str, float]:
-        distances: dict[str, float] = {name: float('inf')
-                                       for name in self.graph}
-        distances[goal] = 0
+        distances: dict[str, float] = {name: float('inf') for name in self.graph}
+        distances[goal] = 0.0
+        pq = [(0.0, goal)]
 
-        queue: deque[str] = deque([goal])
+        while pq:
+            current_cost, current = heapq.heappop(pq)
 
-        while queue:
-            current: str = queue.popleft()
+            if current_cost > distances[current]:
+                continue
+
             for neighbor in self.graph[current]:
                 cost = self._get_weight(neighbor)
-                if distances[neighbor] > distances[current] + cost:
-                    distances[neighbor] = distances[current] + cost
-                    queue.append(neighbor)
+                if cost == float('inf'):
+                    continue
+                new_cost = current_cost + cost
+                if new_cost < distances[neighbor]:
+                    distances[neighbor] = new_cost
+                    heapq.heappush(pq, (new_cost, neighbor))
         return distances
 
     def get_best_move(self, drone_current_zone: str, next_occ: str) -> str:
-        best_score = float('inf')
-        best_move = None
+        current_dist = self.dist_map.get(drone_current_zone, float('inf'))
+        best_dist = current_dist
+        best_move = drone_current_zone
 
         for neighbor in self.graph[drone_current_zone]:
+            neighbor_dist = self.dist_map.get(neighbor, float('inf'))
+            if neighbor_dist == float('inf'):
+                continue
+
             zone_data = self.zone[neighbor]
             nb_drones = next_occ.get(neighbor, 0)
             max_drones = zone_data.metadata.max_drones
-            new_cost = (nb_drones / max_drones) * 100.0
-            g = self._get_weight(neighbor) + new_cost
-            h = self.dist_map.get(neighbor, float('inf'))
-            f = g + h
-            dist_neighbor = self.dist_map.get(neighbor, float('inf'))
-            dist_current = self.dist_map.get(drone_current_zone, float('inf'))
-            if dist_neighbor >= dist_current:
-                f += 500.0
-            if f < best_score:
-                best_score = f
+
+            if neighbor != self.goal and nb_drones >= max_drones:
+                continue
+
+            if neighbor_dist < best_dist:
+                best_dist = neighbor_dist
                 best_move = neighbor
 
-        return best_move if best_move is not None else drone_current_zone
+        return best_move
 
     def move_drone(self, drone_id: int, target_zone: str) -> None:
         old_zone = self.drone_state[drone_id]

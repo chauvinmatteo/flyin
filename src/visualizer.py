@@ -182,8 +182,8 @@ class SimulationView(arcade.View):
         arcade.set_background_color(arcade.color.WHITE)
 
         for connection in self.connections:
-            zone_source = self.zones[connection.source]
-            zone_destination = self.zones[connection.destination]
+            zone_source: Zone = self.zones[connection.source]
+            zone_destination: Zone = self.zones[connection.destination]
             arcade.draw_line(
                 (zone_source.x - self.min_x) * self.scale + self.offset_x,
                 (zone_source.y - self.min_y) * self.scale + self.offset_y,
@@ -193,11 +193,26 @@ class SimulationView(arcade.View):
                 2
             )
         for zone in self.zones.values():
+            if zone.role == "start_hub":
+                color = arcade.color.GREEN
+                if zone.metadata.color is not None:
+                    color_upper = zone.metadata.color.upper()
+                    color = getattr(arcade.color, color_upper, color)
+            elif zone.role == "end_hub":
+                color = arcade.color.RED
+                if zone.metadata.color is not None:
+                    color_upper = zone.metadata.color.upper()
+                    color = getattr(arcade.color, color_upper, color)
+            elif zone.role == "hub":
+                color = arcade.color.WHITE_SMOKE
+                if zone.metadata.color is not None:
+                    color_upper = zone.metadata.color.upper()
+                    color = getattr(arcade.color, color_upper, color)
             arcade.draw_circle_filled(
                 (zone.x - self.min_x) * self.scale + self.offset_x,
                 (zone.y - self.min_y) * self.scale + self.offset_y,
                 10,
-                arcade.color.BABY_BLUE
+                color
             )
 
 

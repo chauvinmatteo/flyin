@@ -251,15 +251,3 @@ class SimulationView(arcade.View):
             drone_y = y_source + (y_destination - y_source) * progress
 
             arcade.draw_circle_filled(drone_x, drone_y, 8, arcade.color.BLACK)
-
-
-class GameView(arcade.Window):
-
-    def __init__(self, width, height, title) -> None:
-        super().__init__(width, height, title)
-
-
-window = GameView(screen_width, screen_height, "FLY_IN")
-menu = MenuView()
-window.show_view(menu)
-arcade.run()

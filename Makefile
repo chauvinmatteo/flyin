@@ -5,7 +5,7 @@ MYPY_FLAGS = --warn-return-any --warn-unused-ignores --ignore-missing-imports \
 VENV = .venv
 
 install:
-	uv install
+	uv sync
 
 run:
 	uv run $(PYTHON) $(MAIN)

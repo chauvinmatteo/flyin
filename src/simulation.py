@@ -48,7 +48,8 @@ class Simulation():
             return 0.1
 
     def compute_dijkstra_costs(self, goal: str) -> dict[str, float]:
-        distances: dict[str, float] = {name: float('inf') for name in self.graph}
+        distances: dict[str, float] = {name: float('inf')
+                                       for name in self.graph}
         distances[goal] = 0.0
         pq = [(0.0, goal)]
 

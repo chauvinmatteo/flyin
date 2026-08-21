@@ -1,12 +1,15 @@
 import arcade
-from visualizer import MapSelectionView
+from visualizer import MenuView
 
 
 def main() -> None:
-    window = arcade.Window(1200, 800, "Fly In - Visualiseur")
-    menu_depart = MapSelectionView()
-    window.show_view(menu_depart)
-    arcade.run()
+    try:
+        window = arcade.Window(1200, 800, "Fly In - Visualiseur")
+        menu_depart = MenuView()
+        window.show_view(menu_depart)
+        arcade.run()
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":

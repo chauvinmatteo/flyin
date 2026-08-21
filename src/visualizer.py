@@ -3,6 +3,7 @@ import arcade.gui
 import os
 from mapdata import Connection, Zone
 from parsing import MapParser
+from simulation import Simulation
 
 screen_width = 1200
 screen_height = 800
@@ -177,6 +178,20 @@ class SimulationView(arcade.View):
         self.offset_x = ((screen_width - map_width * self.scale) / 2)
         self.offset_y = ((screen_height - map_height * self.scale) / 2)
 
+        self.sim = Simulation(self.zones, self.connections, parser.drones_nb)
+        self.old_state = dict(self.sim.drone_state)
+        self.new_state = dict(self.sim.drone_state)
+        self.timer = 0.0
+        self.turn_duration = 1.0
+
+    def on_update(self, delta_time: float) -> None:
+        self.timer += delta_time
+        if self.timer > self.turn_duration and self.sim.is_finished is False:
+            self.old_state: dict[int, str] = dict(self.new_state)
+            self.sim.step()
+            self.new_state: dict[int, str] = dict(self.sim.drone_state)
+            self.timer = 0
+
     def on_draw(self) -> None:
         self.clear()
         arcade.set_background_color(arcade.color.WHITE)
@@ -214,6 +229,28 @@ class SimulationView(arcade.View):
                 10,
                 color
             )
+
+        progress = min(1.0, (self.timer / self.turn_duration))
+        for drone_id in self.sim.drone_state.keys():
+            source = self.old_state[drone_id]
+            destination = self.new_state[drone_id]
+
+            zone_source = self.zones[source]
+            zone_destination = self.zones[destination]
+
+            x_source = ((zone_source.x - self.min_x) *
+                        self.scale + self.offset_x)
+            y_source = ((zone_source.y - self.min_y) *
+                        self.scale + self.offset_y)
+            x_destination = ((zone_destination.x - self.min_x) *
+                             self.scale + self.offset_x)
+            y_destination = ((zone_destination.y - self.min_y) *
+                             self.scale + self.offset_y)
+
+            drone_x = x_source + (x_destination - x_source) * progress
+            drone_y = y_source + (y_destination - y_source) * progress
+
+            arcade.draw_circle_filled(drone_x, drone_y, 8, arcade.color.BLACK)
 
 
 class GameView(arcade.Window):
